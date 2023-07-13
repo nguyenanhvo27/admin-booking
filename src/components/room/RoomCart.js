@@ -74,7 +74,10 @@ export default function Rooms() {
               <TableCell>{room.capacity}</TableCell>
               <TableCell>{room.prize}</TableCell>
               <TableCell>{room.facilities}</TableCell>
-              <TableCell color="success">{room.status}</TableCell>
+              <TableCell color="success">
+                {room.status === 'pending' ? <p>Đợi duyệt</p> : <></>}
+                {room.status === 'concealed' ? <p>Đang ẩn</p> : <></>}
+              </TableCell>
               <TableCell key={room.room_id}>
                 <Button
                   className="bg-blue-700"

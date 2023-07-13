@@ -22,8 +22,10 @@ import {
   TablePagination,
 } from '@mui/material';
 
-import { useQuery } from '@tanstack/react-query';
-import { getUser } from '../api/user';
+import { toast } from 'react-toastify';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getUser, blockUser, unBlockUser } from '../api/user';
 // components
 import Label from '../components/label';
 
@@ -93,6 +95,35 @@ function UserPage() {
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const queryClient = useQueryClient();
+
+  const mutate = useMutation({
+    mutationFn: (id) => blockUser(id),
+    onSuccess: (_, id) => {
+      toast.success('Chặn thành công');
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError(error) {
+      toast.error(`${error}`);
+    },
+  });
+
+  const unlockUser = useMutation({
+    mutationFn: (id) => unBlockUser(id),
+    onSuccess: (_, id) => {
+      toast.success('Bỏ chặn thành công');
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError(error) {
+      toast.error(`${error}`);
+    },
+  });
+  const handleBlock = (id) => {
+    mutate.mutate(id);
+  };
+  const handleUnblock = (id) => {
+    unlockUser.mutate(id);
+  };
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -192,15 +223,25 @@ function UserPage() {
                         <TableCell align="left">{user.phone_number}</TableCell>
                         <TableCell align="left">{user.location}</TableCell>
                         <TableCell align="left">{user.role}</TableCell>
-
-                        {/* <TableCell align="left">
-                          <Label color={(status === 'banned' && 'error') || 'success'}>{sentenceCase(status)}</Label>
-                        </TableCell> */}
-
-                        <TableCell align="right">
-                          <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
-                            <Iconify icon={'eva:more-vertical-fill'} />
-                          </IconButton>
+                        <TableCell>
+                          {user.role === 'user' ? (
+                            <TableCell align="right" key={user.user_id}>
+                              <Button variant="outlined" color="error" onClick={() => handleBlock(user.user_id)}>
+                                Chặn
+                              </Button>
+                            </TableCell>
+                          ) : (
+                            <></>
+                          )}
+                          {user.status === 'block' ? (
+                            <TableCell align="right" key={user.user_id}>
+                              <Button variant="outlined" color="success" onClick={() => handleUnblock(user.user_id)}>
+                                gỡ chặn
+                              </Button>
+                            </TableCell>
+                          ) : (
+                            <></>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -211,30 +252,6 @@ function UserPage() {
                     </TableRow>
                   )}
                 </TableBody>
-
-                {/* {isNotFound && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <Paper
-                          sx={{
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Typography variant="h6" paragraph>
-                            Not found
-                          </Typography>
-
-                          <Typography variant="body2">
-                            No results found for &nbsp;
-                            <strong>&quot;{filterName}&quot;</strong>.
-                            <br /> Try checking for typos or using complete words.
-                          </Typography>
-                        </Paper>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )} */}
               </Table>
             </TableContainer>
           </Scrollbar>
@@ -250,35 +267,6 @@ function UserPage() {
           />
         </Card>
       </Container>
-
-      <Popover
-        open={Boolean(open)}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: {
-            p: 1,
-            width: 140,
-            '& .MuiMenuItem-root': {
-              px: 1,
-              typography: 'body2',
-              borderRadius: 0.75,
-            },
-          },
-        }}
-      >
-        <MenuItem>
-          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem sx={{ color: 'error.main' }}>
-          <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-          Delete
-        </MenuItem>
-      </Popover>
     </>
   );
 }

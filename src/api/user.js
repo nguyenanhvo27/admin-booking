@@ -8,3 +8,20 @@ export const getUser = async () => {
     throw new Error(error.message);
   }
 };
+
+export const blockUser = async (id) => {
+  try {
+    const response = await axiosInstance.put(`/user/lockUser/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+export const unBlockUser = async (id) => {
+  try {
+    const response = await axiosInstance.put(`/user/unBlockUser/${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

@@ -38,6 +38,7 @@ export default function Rooms() {
 
   const handleUpdateStatus = (id) => {
     updateStatusRoom.mutate(id);
+    window.location.reload();
   };
   // const handleRoomDetail = (id) => {
   //   // navigate(`/detail/${id}`);

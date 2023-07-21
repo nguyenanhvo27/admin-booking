@@ -15,13 +15,13 @@ import { Stack, Button, Popover, MenuItem, Container, Typography } from '@mui/ma
 import Iconify from '../components/iconify';
 
 import requireAuth from '../hocs/requireAuth';
-import { getTransaction } from '../api/transaction';
+import { getHotelierTransaction } from '../api/hotelierTransaction';
 
 const columns = [
   { id: 'transaction_id', label: 'Mã', minWidth: 170 },
   {
     id: 'hotelier',
-    label: 'HOTELIER',
+    label: 'TÊN KHÁCH SẠN',
     minWidth: 170,
   },
   { id: 'amount', label: 'SỐ TIỀN', minWidth: 100 },
@@ -32,12 +32,12 @@ const columns = [
   },
   {
     id: 'created_at',
-    label: 'NGÀY TẠO',
+    label: 'NGÀY THANH TOÁN ',
     minWidth: 170,
   },
   {
     id: 'action',
-    label: 'Action',
+    label: 'XEM CHI TIẾT',
     minWidth: 170,
   },
 ];
@@ -61,9 +61,10 @@ function TransactionPage() {
   };
 
   const query = useQuery({
-    queryKey: ['transaction'],
-    queryFn: getTransaction,
+    queryKey: ['hotelierTransaction'],
+    queryFn: getHotelierTransaction,
   });
+  console.log(query.data?.[0]?.hotelier_transaction_id, 'qua');
 
   return (
     <>
@@ -88,33 +89,26 @@ function TransactionPage() {
                   </TableCell>
                 ))}
               </TableRow>
-              {query?.isSuccess ? (
-                query?.data.map((row) => {
-                  return (
-                    <TableBody key={row?.transaction_id}>
-                      <TableCell>{row?.transaction_id}</TableCell>
-                      <TableCell>
-                        {row?.____reservations____?.[0]?.__hotel__?.__user__?.first_name}{' '}
-                        {row?.____reservations____?.[0]?.__hotel__?.__user__?.last_name}
-                      </TableCell>
-                      <TableCell>
-                        {!Number.isNaN(row?.amount) &&
-                          Number(row?.amount).toLocaleString('IT', {
-                            style: 'currency',
-                            currency: 'VND',
-                          })}
-                      </TableCell>
-                      <TableCell>{row?.status}</TableCell>
-                      <TableCell>{`${new Date(row?.created_at).toLocaleDateString()} ${new Date(
-                        row?.created_at
-                      ).toLocaleTimeString()}`}</TableCell>
-                      <TableCell>action</TableCell>
-                    </TableBody>
-                  );
-                })
-              ) : (
-                <></>
-              )}
+              <TableBody key={query.data?.[0]?.hotelier_transaction_id}>
+                <TableCell>{query.data?.[0]?.hotelier_transaction_id}</TableCell>
+                <TableCell>{query.data?.[0]?.__hotel__.hotel_name} </TableCell>
+                <TableCell>
+                  {!Number.isNaN(query.data?.[0]?.total) &&
+                    Number(query.data?.[0]?.total).toLocaleString('IT', {
+                      style: 'currency',
+                      currency: 'VND',
+                    })}
+                </TableCell>
+                {query.data?.[0]?.status === 'unpaid' ? (
+                  <TableCell>Chưa thanh toán</TableCell>
+                ) : (
+                  <TableCell>ĐÃ thanh toán</TableCell>
+                )}
+                <TableCell>{`${new Date(query.data?.[0]?.created_at).toLocaleDateString()} ${new Date(
+                  query.data?.[0]?.created_at
+                ).toLocaleTimeString()}`}</TableCell>
+                <TableCell>Xem chi tiết</TableCell>
+              </TableBody>
             </Table>
           </TableContainer>
           <TablePagination

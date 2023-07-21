@@ -11,7 +11,7 @@ export const getUser = async () => {
 
 export const blockUser = async (id) => {
   try {
-    const response = await axiosInstance.put(`/user/lockUser/${id}`);
+    const response = await axiosInstance.put(`/user/blockUser/${id}`);
     return response.data;
   } catch (error) {
     throw new Error(error.message);
